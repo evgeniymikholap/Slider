@@ -16,7 +16,7 @@ private struct SliderConstants {
     static let minWidth = 100.0
     static let numberOfLabels = 2
     static let animationDuration = 0.3
-    static let sliderViewShadowOpacity: Float = 0.1
+    static let sliderViewShadowOpacity: Float = 0.2
     static let sliderViewShadowRadius: CGFloat = 2
     static let sliderViewShadowOffset = CGSize(width: 0, height: 0)
 
@@ -44,15 +44,19 @@ open class SliderControl: UIControl {
             rightLabel.text = newValue
         }
     }
-    var sliderTitle: String?
-//    {
-//        get {
-//            return sliderLabel.text!
-//        }
-//        set {
-//            sliderLabel.text = newValue
-//        }
-//    }
+    var sliderTitle: String {
+        get {
+            return sliderViewLabel.text!
+        }
+        set {
+            sliderViewLabel.text = newValue
+            sliderViewLabel.textAlignment = .center
+            sliderViewLabel.font = sliderTitleFont
+            sliderViewLabel.textColor = sliderTextColor
+            sliderViewLabel.numberOfLines = 0
+        }
+    }
+
     var isOn = true
     fileprivate(set) open var selectedIndex = 0 {
         didSet {
@@ -66,6 +70,8 @@ open class SliderControl: UIControl {
             setNeedsDisplay()
         }
     }
+
+    var sliderTitleFont = UIFont.systemFont(ofSize: 15, weight: .medium)
 
     @IBInspectable
     var leftSideBackgroundColor: UIColor! {
@@ -89,7 +95,8 @@ open class SliderControl: UIControl {
     @IBInspectable
     var sliderSecondBackgroundColor: UIColor!
 
-
+    @IBInspectable
+    var sliderTextColor: UIColor!
 
 
     // MARK: Private variables
@@ -98,6 +105,7 @@ open class SliderControl: UIControl {
     fileprivate var leftLabel = UILabel()
     fileprivate var rightLabel = UILabel()
     fileprivate var sliderView = UIView()
+    fileprivate var sliderViewLabel = UILabel()
 
     fileprivate var tapGesture: UITapGestureRecognizer!
     fileprivate var panGesture: UIPanGestureRecognizer!
@@ -130,6 +138,7 @@ open class SliderControl: UIControl {
         titleLabelsStackView.addArrangedSubview(rightLabel)
 
         addSubview(titleLabelsStackView)
+        sliderView.addSubview(sliderViewLabel)
         addSubview(sliderView)
 
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(tap))
@@ -140,13 +149,17 @@ open class SliderControl: UIControl {
         addGestureRecognizer(panGesture)
     }
 
+    fileprivate let sliderViewShadowLayer = CAShapeLayer()
+    fileprivate let sliderViewGradientLayer = CAGradientLayer()
+
     open override func draw(_ rect: CGRect) {
         super.draw(rect)
+
+        [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
 
         layer.cornerRadius = bounds.height / 2
         layer.masksToBounds = true
 
-        let sliderViewShadowLayer = CAShapeLayer()
         sliderViewShadowLayer.path = UIBezierPath(roundedRect: sliderView.bounds, cornerRadius: sliderView.bounds.height / 2).cgPath
         sliderViewShadowLayer.fillColor = UIColor.clear.cgColor
         sliderViewShadowLayer.shadowColor = UIColor.black.cgColor
@@ -154,23 +167,15 @@ open class SliderControl: UIControl {
         sliderViewShadowLayer.shadowOffset = SliderConstants.sliderViewShadowOffset
         sliderViewShadowLayer.shadowOpacity = SliderConstants.sliderViewShadowOpacity
         sliderViewShadowLayer.shadowRadius = SliderConstants.sliderViewShadowRadius
-        sliderView.layer.addSublayer(sliderViewShadowLayer)
+        sliderView.layer.insertSublayer(sliderViewShadowLayer, below: sliderViewLabel.layer)
 
-//        let sliderViewLayer = CALayer()
-//        sliderViewLayer.frame = sliderView.bounds
-//        sliderViewLayer.cornerRadius = sliderView.bounds.height / 2
-//        sliderViewLayer.masksToBounds = true
-//        sliderViewLayer.backgroundColor = sliderBackgroundColor.cgColor
-//        sliderView.layer.addSublayer(sliderViewLayer)
-
-        let sliderViewGradientLayer = CAGradientLayer()
         sliderViewGradientLayer.colors = [sliderFirstBackgroundColor, sliderSecondBackgroundColor].map { $0.cgColor }
         sliderViewGradientLayer.startPoint = CGPoint(x: 0, y: 0)
         sliderViewGradientLayer.endPoint = CGPoint(x: 0, y: 1)
         sliderViewGradientLayer.frame = sliderView.bounds
         sliderViewGradientLayer.cornerRadius = sliderView.bounds.height / 2
         sliderViewGradientLayer.masksToBounds = true
-        sliderView.layer.addSublayer(sliderViewGradientLayer)
+        sliderView.layer.insertSublayer(sliderViewGradientLayer, below: sliderViewLabel.layer)
     }
 
     // MARK: Gestures
@@ -238,6 +243,9 @@ open class SliderControl: UIControl {
         let sliderSideSize = bounds.height - sliderLabelInset * 2
         sliderView.frame = CGRect(x: fabs(CGFloat(selectedIndex) * (bounds.width - sliderSideSize) - sliderLabelInset), y: sliderLabelInset, width:  sliderSideSize, height: sliderSideSize)
 
+        sliderViewLabel.frame = sliderView.bounds
+        sliderViewLabel.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+
         rightLabel.alpha = selectedIndex == 1 ? 0 : 1
         leftLabel.alpha = selectedIndex == 0 ? 0 : 1
     }
@@ -250,7 +258,11 @@ open class SliderControl: UIControl {
 extension SliderControl: UIGestureRecognizerDelegate {
 
     override open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
+        if gestureRecognizer == panGesture {
+            return sliderView.frame.contains(gestureRecognizer.location(in: self))
+        }
+
+        return super.gestureRecognizerShouldBegin(gestureRecognizer)
     }
 
 }

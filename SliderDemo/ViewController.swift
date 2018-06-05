@@ -17,7 +17,7 @@ class ViewController: UIViewController {
 
         slider.leftSideTitle = "Downloading…"
         slider.rightSideTitle = "Slide to download"
-        slider.sliderTitle = "Start"
+        slider.sliderTitle = "START"
     }
 
     override func didReceiveMemoryWarning() {
@@ -26,7 +26,7 @@ class ViewController: UIViewController {
     }
 
     @IBAction func sliderValueChanged(_ sender: SliderControl) {
-        slider.sliderTitle = sender.selectedIndex == 0 ? "Start" : "Stop"
+        slider.sliderTitle = sender.selectedIndex == 0 ? "START" : "STOP"
     }
 
 }
