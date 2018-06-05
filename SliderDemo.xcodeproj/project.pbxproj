@@ -12,6 +12,7 @@
 		3B7569CE20C6C18A00A8874B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3B7569CC20C6C18A00A8874B /* Main.storyboard */; };
 		3B7569D020C6C18C00A8874B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7569CF20C6C18C00A8874B /* Assets.xcassets */; };
 		3B7569D320C6C18C00A8874B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3B7569D120C6C18C00A8874B /* LaunchScreen.storyboard */; };
+		3B7569DC20C6C28B00A8874B /* SliderControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7569DB20C6C28B00A8874B /* SliderControl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		3B7569CF20C6C18C00A8874B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3B7569D220C6C18C00A8874B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3B7569D420C6C18C00A8874B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3B7569DB20C6C28B00A8874B /* SliderControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderControl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 		3B7569C720C6C18A00A8874B /* SliderDemo */ = {
 			isa = PBXGroup;
 			children = (
+				3B7569DA20C6C27A00A8874B /* SliderControl */,
 				3B7569C820C6C18A00A8874B /* AppDelegate.swift */,
 				3B7569CA20C6C18A00A8874B /* ViewController.swift */,
 				3B7569CC20C6C18A00A8874B /* Main.storyboard */,
@@ -62,6 +65,14 @@
 				3B7569D420C6C18C00A8874B /* Info.plist */,
 			);
 			path = SliderDemo;
+			sourceTree = "<group>";
+		};
+		3B7569DA20C6C27A00A8874B /* SliderControl */ = {
+			isa = PBXGroup;
+			children = (
+				3B7569DB20C6C28B00A8874B /* SliderControl.swift */,
+			);
+			path = SliderControl;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -136,6 +147,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B7569CB20C6C18A00A8874B /* ViewController.swift in Sources */,
+				3B7569DC20C6C28B00A8874B /* SliderControl.swift in Sources */,
 				3B7569C920C6C18A00A8874B /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
