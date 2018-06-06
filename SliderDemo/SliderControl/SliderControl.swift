@@ -256,6 +256,8 @@ open class SliderControl: UIControl {
             frame.origin.x += gesture.translation(in: self).x
             frame.origin.x = max(min(frame.origin.x, bounds.width - sliderLabelInset - frame.width), sliderLabelInset)
             sliderView.frame = frame
+            leftBackgroundView.alpha = frame.origin.x / bounds.width
+            rightBackgroundView.alpha = 1 - frame.origin.x / bounds.width
             break
         case .ended, .failed, .cancelled:
             let index = Int(sliderView.center.x / (bounds.width / CGFloat(SliderConstants.numberOfLabels)))
@@ -307,8 +309,8 @@ open class SliderControl: UIControl {
         leftBackgroundView.frame = bounds
         rightBackgroundView.frame = bounds
 
-        leftBackgroundView.isHidden = selectedIndex == 0
-        rightBackgroundView.isHidden = selectedIndex == 1
+        leftBackgroundView.alpha = selectedIndex == 0 ? 0 : 1
+        rightBackgroundView.alpha = selectedIndex == 1 ? 0 : 1
 
         activityIndicator.center = CGPoint(x: sliderSideSize / 2, y: sliderSideSize / 2)
     }
