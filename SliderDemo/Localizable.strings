@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  SliderDemo
+
+  Created by Evgeniy Mikholap on 6/6/18.
+  Copyright © 2018 Evgeniy Mikholap. All rights reserved.
+*/
+
+
+"slider.label.text.requesting"             = "requesting…";
+"slider.label.text.done"                   = "done";
+"slider.left-label.text.checkin"           = "check-in…";
+"slider.left-label.text.slide-to-lock"     = "slide to lock";
+"slider.right-label.text.slide-to-start"   = "slide to start";
+"slider.right-label.text.slide-to-checkin" = "slide to check-in";
+"slider.right-label.text.slide-to-unlock"  = "slide to unlock";
+"slider.main.text.start"                   = "start";
+"slider.main.text.stop"                    = "stop";
+"slider.main.text.checkin"                 = "check-in";

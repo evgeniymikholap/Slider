@@ -18,70 +18,39 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        slider.leftSideTitle = "requesting…"
-        slider.rightSideTitle = "slide to start"
-        slider.sliderTitle = "START"
+        slider.leftSideTitle = NSLocalizedString("slider.label.text.requesting", comment: "")
+        slider.rightSideTitle = NSLocalizedString("slider.right-label.text.slide-to-start", comment: "")
+        slider.sliderTitle = NSLocalizedString("slider.main.text.start", comment: "").localizedUppercase
 
-        let slider2 = SliderControl(sliderTitle: "Check-in", leftSideTitle: "check-in…", rightSideTitle: "slide to check-in")
+        let slider2 = SliderControl(sliderTitle: NSLocalizedString("slider.main.text.checkin", comment: "").localizedCapitalized,
+                                    leftSideTitle: NSLocalizedString("slider.left-label.text.checkin", comment: ""),
+                                    rightSideTitle: NSLocalizedString("slider.right-label.text.slide-to-checkin", comment: ""))
         slider2.frame = CGRect(x: 50.0, y: 20.0, width: view.bounds.width - 100.0, height: 100.0)
         slider2.autoresizingMask = [.flexibleWidth]
         view.addSubview(slider2)
 
-        slider3.rightSideTitle = "slide to unlock"
-        slider3.sliderTitle = "START"
-        slider3.leftSideTitle = "slide to lock"
+        slider3.rightSideTitle = NSLocalizedString("slider.right-label.text.slide-to-unlock", comment: "")
+        slider3.sliderTitle = NSLocalizedString("slider.main.text.start", comment: "").localizedUppercase
+        slider3.leftSideTitle = NSLocalizedString("slider.left-label.text.slide-to-lock", comment: "")
         slider3.isEnabled = false
 
         slider4.selectedIndex = 1
-        slider4.rightSideTitle = "slide to unlock"
-        slider4.sliderTitle = "STOP"
-        slider4.leftSideTitle = "slide to lock"
+        slider4.rightSideTitle = NSLocalizedString("slider.right-label.text.slide-to-unlock", comment: "")
+        slider4.sliderTitle = NSLocalizedString("slider.main.text.stop", comment: "").localizedUppercase
+        slider4.leftSideTitle = NSLocalizedString("slider.left-label.text.slide-to-lock", comment: "")
         slider4.isEnabled = false
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
     @IBAction func sliderValueChanged(_ sender: SliderControl) {
-//        if sender.controlState != .error {
-//            sender.showActivityIndicator()
-//            sender.sliderTitle = sender.selectedIndex == 0 ? "START" : "STOP"
-//            sender.isEnabled = false
-//
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-//                sender.isEnabled = true
-//                sender.hideActivityIndicator()
-//
-//                let isError = Bool(truncating: arc4random() % 2 as NSNumber);
-//
-//                if isError {
-//                    sender.leftSideTitle = sender.selectedIndex == 0 ? "requesting…" : "error"
-//                    sender.rightSideTitle = sender.selectedIndex == 0 ? "error" : "slide to start"
-//                    sender.controlState = .error
-//                    sender.setSelectedIndex(1 - sender.selectedIndex, animated: true, animationDelay: 2)
-//                } else {
-//                    sender.rightSideTitle = sender.selectedIndex == 0 ? "slide to start" : "requesting…"
-//                    sender.leftSideTitle = sender.selectedIndex == 0 ? "requesting…" : "done"
-//                }
-//            }
-//        } else {
-//            sender.controlState = .normal
-//            sender.leftSideTitle = sender.selectedIndex == 0 ? "requesting…" : "done"
-//            sender.rightSideTitle = sender.selectedIndex == 0 ? "slide to start" : "done"
-//        }
-//    }
+        sender.showActivityIndicator()
+        sender.sliderTitle = NSLocalizedString(sender.selectedIndex == 0 ? "slider.main.text.start" : "slider.main.text.stop", comment: "").localizedUppercase
 
-            sender.showActivityIndicator()
-            sender.sliderTitle = sender.selectedIndex == 0 ? "START" : "STOP"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            sender.hideActivityIndicator()
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                sender.hideActivityIndicator()
-
-                sender.rightSideTitle = sender.selectedIndex == 0 ? "slide to start" : "requesting…"
-                sender.leftSideTitle = sender.selectedIndex == 0 ? "requesting…" : "done"
-            }
+            sender.rightSideTitle =  NSLocalizedString(sender.selectedIndex == 0 ? "slider.right-label.text.slide-to-start" : "slider.label.text.requesting", comment: "")
+            sender.leftSideTitle =  NSLocalizedString(sender.selectedIndex == 0 ? "slider.label.text.requesting" : "slider.label.text.done", comment: "")
+        }
     }
 }
 
