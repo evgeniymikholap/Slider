@@ -315,6 +315,10 @@ public protocol SliderControlProtocol {
         layer.cornerRadius = bounds.height / 2
         layer.masksToBounds = true
 
+        drawSliderViewLayers()
+    }
+
+    fileprivate func drawSliderViewLayers() {
         sliderViewShadowLayer.path = UIBezierPath(roundedRect: sliderView.bounds, cornerRadius: sliderView.bounds.height / 2).cgPath
         sliderViewShadowLayer.fillColor = UIColor.clear.cgColor
         sliderViewShadowLayer.shadowColor = UIColor.black.cgColor
