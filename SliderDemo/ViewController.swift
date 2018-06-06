@@ -15,8 +15,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        slider.leftSideTitle = "Downloading…"
-        slider.rightSideTitle = "Slide to download"
+        slider.leftSideTitle = "requesting…"
+        slider.rightSideTitle = "slide to start"
         slider.sliderTitle = "START"
     }
 
@@ -26,7 +26,14 @@ class ViewController: UIViewController {
     }
 
     @IBAction func sliderValueChanged(_ sender: SliderControl) {
+        sender.showActivityIndicator()
         slider.sliderTitle = sender.selectedIndex == 0 ? "START" : "STOP"
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            sender.hideActivityIndicator()
+            sender.rightSideTitle = sender.selectedIndex == 0 ? "slide to start" : "requesting…"
+            sender.leftSideTitle = sender.selectedIndex == 0 ? "requesting…" : "done"
+        }
     }
 
 }

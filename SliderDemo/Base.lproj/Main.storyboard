@@ -24,23 +24,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="OTX-Kp-80n"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="leftSideBackgroundColor">
-                                        <color key="value" red="0.0039215686274509803" green="0.68627450980392157" blue="0.56470588235294117" alpha="1" colorSpace="calibratedRGB"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="rightSideBackgroundColor">
-                                        <color key="value" red="0.46274509803921571" green="0.46274509803921571" blue="0.46274509803921571" alpha="1" colorSpace="calibratedRGB"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="sliderFirstBackgroundColor">
-                                        <color key="value" red="0.99215686274509807" green="0.9882352941176471" blue="0.98039215686274506" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="sliderSecondBackgroundColor">
-                                        <color key="value" red="0.85098039215686272" green="0.85098039215686272" blue="0.87058823529411766" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="sliderTextColor">
-                                        <color key="value" red="0.71764705882352942" green="0.71372549019607845" blue="0.73333333333333328" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="sliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="YaN-y7-4uC"/>
                                 </connections>

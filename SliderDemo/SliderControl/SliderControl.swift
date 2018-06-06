@@ -12,8 +12,9 @@ import UIKit
 
 private struct SliderConstants {
 
-    static let minHeight = 44.0
-    static let minWidth = 100.0
+    static let minHeight: CGFloat = 44
+    static let minWidth: CGFloat = 100
+    static let maxHeight: CGFloat = 100
     static let numberOfLabels = 2
     static let animationDuration = 0.3
     static let sliderViewShadowOpacity: Float = 0.2
@@ -34,6 +35,10 @@ open class SliderControl: UIControl {
         }
         set {
             leftLabel.text = newValue
+            leftLabel.textAlignment = .left
+            leftLabel.font = leftLabelTitleFont
+            leftLabel.textColor = leftLabelTextColor
+            leftLabel.numberOfLines = 0
         }
     }
     var rightSideTitle: String {
@@ -42,6 +47,10 @@ open class SliderControl: UIControl {
         }
         set {
             rightLabel.text = newValue
+            rightLabel.textAlignment = .right
+            rightLabel.font = rightLabelTitleFont
+            rightLabel.textColor = rightLabelTextColor
+            rightLabel.numberOfLines = 0
         }
     }
     var sliderTitle: String {
@@ -58,11 +67,7 @@ open class SliderControl: UIControl {
     }
 
     var isOn = true
-    fileprivate(set) open var selectedIndex = 0 {
-        didSet {
-            backgroundColor = selectedIndex == 0 ? rightSideBackgroundColor : leftSideBackgroundColor
-        }
-    }
+    fileprivate(set) open var selectedIndex = 0
 
     var sliderLabelInset: CGFloat = 4 {
         didSet {
@@ -71,44 +76,92 @@ open class SliderControl: UIControl {
         }
     }
 
-    var sliderTitleFont = UIFont.systemFont(ofSize: 15, weight: .medium)
+    var sliderTitleFont = UIFont.systemFont(ofSize: 15, weight: .medium) {
+        didSet {
+            sliderViewLabel.font = sliderTitleFont
+        }
+    }
+    var leftLabelTitleFont = UIFont.systemFont(ofSize: 16, weight: .medium) {
+        didSet {
+            leftLabel.font = leftLabelTitleFont
+        }
+    }
+    var rightLabelTitleFont = UIFont.systemFont(ofSize: 16, weight: .medium) {
+        didSet {
+            rightLabel.font = rightLabelTitleFont
+        }
+    }
 
     @IBInspectable
-    var leftSideBackgroundColor: UIColor! {
+    var leftSideBackgroundColor: UIColor = #colorLiteral(red: 0, green: 0.7307787538, blue: 0.6325929761, alpha: 1) {
         didSet {
-            if selectedIndex == 1 {
-                backgroundColor = leftSideBackgroundColor
-            }
+            leftBackgroundView.backgroundColor = leftSideBackgroundColor
         }
     }
     @IBInspectable
-    var rightSideBackgroundColor: UIColor! {
+    var rightSideBackgroundColor: UIColor = #colorLiteral(red: 0.5369121432, green: 0.5369251966, blue: 0.5369181633, alpha: 1) {
         didSet {
-            if selectedIndex == 0 {
-                backgroundColor = rightSideBackgroundColor
-            }
+            rightBackgroundView.backgroundColor = rightSideBackgroundColor
         }
     }
     @IBInspectable
-    var sliderFirstBackgroundColor: UIColor!
+    var sliderFirstBackgroundColor: UIColor = #colorLiteral(red: 0.9921568627, green: 0.9882352941, blue: 0.9803921569, alpha: 1) {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
 
     @IBInspectable
-    var sliderSecondBackgroundColor: UIColor!
+    var sliderSecondBackgroundColor: UIColor = #colorLiteral(red: 0.8509803922, green: 0.8509803922, blue: 0.8705882353, alpha: 1) {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
 
     @IBInspectable
-    var sliderTextColor: UIColor!
+    var sliderTextColor: UIColor = #colorLiteral(red: 0.7176470588, green: 0.7137254902, blue: 0.7333333333, alpha: 1) {
+        didSet {
+            sliderViewLabel.textColor = sliderTextColor
+        }
+    }
+
+    @IBInspectable
+    var leftLabelTextColor: UIColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1) {
+        didSet {
+            leftLabel.textColor = leftLabelTextColor
+        }
+    }
+
+    @IBInspectable
+    var rightLabelTextColor: UIColor = #colorLiteral(red: 0.2901960784, green: 0.2901960784, blue: 0.2901960784, alpha: 1) {
+        didSet {
+            rightLabel.textColor = rightLabelTextColor
+        }
+    }
+
+    func showActivityIndicator() {
+        activityIndicator.startAnimating()
+        sliderViewLabel.isHidden = true
+    }
+
+    func hideActivityIndicator() {
+        activityIndicator.stopAnimating()
+        sliderViewLabel.isHidden = false
+    }
 
 
     // MARK: Private variables
 
-    fileprivate var titleLabelsStackView = UIStackView()
+    fileprivate var leftBackgroundView = UIView()
+    fileprivate var rightBackgroundView = UIView()
     fileprivate var leftLabel = UILabel()
     fileprivate var rightLabel = UILabel()
     fileprivate var sliderView = UIView()
     fileprivate var sliderViewLabel = UILabel()
-
+    fileprivate var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     fileprivate var tapGesture: UITapGestureRecognizer!
     fileprivate var panGesture: UIPanGestureRecognizer!
+
 
     // MARK: Initializers
 
@@ -133,12 +186,14 @@ open class SliderControl: UIControl {
     }
 
     fileprivate func commonInit() {
-        titleLabelsStackView.axis = .horizontal
-        titleLabelsStackView.addArrangedSubview(leftLabel)
-        titleLabelsStackView.addArrangedSubview(rightLabel)
+        sizeToFit()
 
-        addSubview(titleLabelsStackView)
+        addSubview(leftBackgroundView)
+        addSubview(rightBackgroundView)
+        leftBackgroundView.addSubview(leftLabel)
+        rightBackgroundView.addSubview(rightLabel)
         sliderView.addSubview(sliderViewLabel)
+        sliderView.addSubview(activityIndicator)
         addSubview(sliderView)
 
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(tap))
@@ -154,6 +209,9 @@ open class SliderControl: UIControl {
 
     open override func draw(_ rect: CGRect) {
         super.draw(rect)
+
+        leftBackgroundView.backgroundColor = leftSideBackgroundColor
+        rightBackgroundView.backgroundColor = rightSideBackgroundColor
 
         [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
 
@@ -177,6 +235,7 @@ open class SliderControl: UIControl {
         sliderViewGradientLayer.masksToBounds = true
         sliderView.layer.insertSublayer(sliderViewGradientLayer, below: sliderViewLabel.layer)
     }
+
 
     // MARK: Gestures
 
@@ -230,15 +289,11 @@ open class SliderControl: UIControl {
         }
     }
 
+
     // MARK: - Layout
 
     override open func layoutSubviews() {
         super.layoutSubviews()
-
-        titleLabelsStackView.frame = bounds
-        titleLabelsStackView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-        titleLabelsStackView.distribution = .fillEqually
-        titleLabelsStackView.spacing = 10
 
         let sliderSideSize = bounds.height - sliderLabelInset * 2
         sliderView.frame = CGRect(x: fabs(CGFloat(selectedIndex) * (bounds.width - sliderSideSize) - sliderLabelInset), y: sliderLabelInset, width:  sliderSideSize, height: sliderSideSize)
@@ -246,8 +301,31 @@ open class SliderControl: UIControl {
         sliderViewLabel.frame = sliderView.bounds
         sliderViewLabel.autoresizingMask = [.flexibleHeight, .flexibleWidth]
 
-        rightLabel.alpha = selectedIndex == 1 ? 0 : 1
-        leftLabel.alpha = selectedIndex == 0 ? 0 : 1
+        let halfHeight = bounds.height / 2
+        leftLabel.frame = CGRect(x: halfHeight, y: 0, width: bounds.width - halfHeight - sliderSideSize - sliderLabelInset * 2, height: bounds.height)
+        rightLabel.frame = CGRect(x: bounds.height, y: 0, width: bounds.width - halfHeight - bounds.height, height: bounds.height)
+        leftBackgroundView.frame = bounds
+        rightBackgroundView.frame = bounds
+
+        leftBackgroundView.isHidden = selectedIndex == 0
+        rightBackgroundView.isHidden = selectedIndex == 1
+
+        activityIndicator.center = CGPoint(x: sliderSideSize / 2, y: sliderSideSize / 2)
+    }
+
+    open override func sizeThatFits(_ size: CGSize) -> CGSize {
+        var fittingSize = size
+        if size.height < SliderConstants.minHeight {
+            fittingSize.height = SliderConstants.minHeight
+        } else if size.height > SliderConstants.maxHeight {
+            fittingSize.height = SliderConstants.maxHeight
+        }
+
+        if size.width < SliderConstants.minWidth {
+            fittingSize.width = SliderConstants.minWidth
+        }
+
+        return fittingSize
     }
 
 }
