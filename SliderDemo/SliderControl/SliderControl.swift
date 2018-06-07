@@ -130,12 +130,6 @@ public protocol SliderControlProtocol {
         }
         set {
             leftLabel.text = newValue
-            leftLabel.textAlignment = .left
-            leftLabel.font = leftLabelTitleFont
-            leftLabel.textColor = leftLabelTextColor
-            leftLabel.minimumScaleFactor = 0.5
-            leftLabel.adjustsFontSizeToFitWidth = true
-            leftLabel.numberOfLines = 0
         }
     }
     public var rightSideTitle: String {
@@ -144,12 +138,6 @@ public protocol SliderControlProtocol {
         }
         set {
             rightLabel.text = newValue
-            rightLabel.textAlignment = .right
-            rightLabel.font = rightLabelTitleFont
-            rightLabel.textColor = rightLabelTextColor
-            rightLabel.minimumScaleFactor = 0.5
-            rightLabel.adjustsFontSizeToFitWidth = true
-            rightLabel.numberOfLines = 0
         }
     }
     public var sliderTitle: String {
@@ -158,12 +146,6 @@ public protocol SliderControlProtocol {
         }
         set {
             sliderViewLabel.text = newValue
-            sliderViewLabel.textAlignment = .center
-            sliderViewLabel.font = sliderTitleFont
-            sliderViewLabel.textColor = sliderTextColor
-            sliderViewLabel.minimumScaleFactor = 0.5
-            sliderViewLabel.adjustsFontSizeToFitWidth = true
-            sliderViewLabel.numberOfLines = 0
         }
     }
     public var selectedIndex = 0
@@ -251,10 +233,37 @@ public protocol SliderControlProtocol {
 
     fileprivate var leftBackgroundView = UIView()
     fileprivate var rightBackgroundView = UIView()
-    fileprivate var leftLabel = UILabel()
-    fileprivate var rightLabel = UILabel()
+    fileprivate lazy var leftLabel: UILabel = {
+        let leftLabel = UILabel()
+        leftLabel.textAlignment = .left
+        leftLabel.font = leftLabelTitleFont
+        leftLabel.textColor = leftLabelTextColor
+        leftLabel.minimumScaleFactor = 0.5
+        leftLabel.adjustsFontSizeToFitWidth = true
+        leftLabel.numberOfLines = 0
+        return leftLabel
+    }()
+    fileprivate lazy var rightLabel: UILabel = {
+        let rightLabel = UILabel()
+        rightLabel.textAlignment = .right
+        rightLabel.font = rightLabelTitleFont
+        rightLabel.textColor = rightLabelTextColor
+        rightLabel.minimumScaleFactor = 0.5
+        rightLabel.adjustsFontSizeToFitWidth = true
+        rightLabel.numberOfLines = 0
+        return rightLabel
+    }()
     fileprivate var sliderView = UIView()
-    fileprivate var sliderViewLabel = UILabel()
+    fileprivate lazy var sliderViewLabel: UILabel = {
+        let sliderViewLabel = UILabel()
+        sliderViewLabel.textAlignment = .center
+        sliderViewLabel.font = sliderTitleFont
+        sliderViewLabel.textColor = sliderTextColor
+        sliderViewLabel.minimumScaleFactor = 0.5
+        sliderViewLabel.adjustsFontSizeToFitWidth = true
+        sliderViewLabel.numberOfLines = 0
+        return sliderViewLabel
+    }()
     fileprivate var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     fileprivate var tapGesture: UITapGestureRecognizer!
     fileprivate var panGesture: UIPanGestureRecognizer!
