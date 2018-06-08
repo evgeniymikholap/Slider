@@ -231,8 +231,16 @@ public protocol SliderControlProtocol {
 
     // MARK: Private variables
 
-    fileprivate var leftBackgroundView = UIView()
-    fileprivate var rightBackgroundView = UIView()
+    fileprivate lazy var leftBackgroundView: UIView = {
+        let leftBackgroundView = UIView()
+        leftBackgroundView.backgroundColor = leftSideBackgroundColor
+        return leftBackgroundView
+    }()
+    fileprivate lazy var rightBackgroundView: UIView = {
+        let rightBackgroundView = UIView()
+        rightBackgroundView.backgroundColor = rightSideBackgroundColor
+        return rightBackgroundView
+    }()
     fileprivate lazy var leftLabel: UILabel = {
         let leftLabel = UILabel()
         leftLabel.textAlignment = .left
@@ -315,9 +323,6 @@ public protocol SliderControlProtocol {
 
     open override func draw(_ rect: CGRect) {
         super.draw(rect)
-
-        leftBackgroundView.backgroundColor = leftSideBackgroundColor
-        rightBackgroundView.backgroundColor = rightSideBackgroundColor
 
         [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
 
