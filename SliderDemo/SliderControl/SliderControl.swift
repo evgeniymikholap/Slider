@@ -23,6 +23,7 @@ private struct SliderConstants {
     static let sliderViewShadowOpacity: Float  = 0.2
     static let sliderViewShadowRadius: CGFloat = 2
     static let sliderViewShadowOffset          = CGSize(width: 0, height: 0)
+    static let fontMinimumScaleFactor: CGFloat = 0.5
 
 }
 
@@ -52,13 +53,13 @@ public enum SliderState {
 /// Public interface for the Slider Control
 public protocol SliderControlProtocol {
     /// Left label title
-    var leftSideTitle: String { get set }
+    var leftSideTitle: String? { get }
 
     /// Right label title
-    var rightSideTitle: String { get set }
+    var rightSideTitle: String? { get }
 
     /// Slider label title
-    var sliderTitle: String { get set }
+    var sliderTitle: String? { get }
 
     /// Selected Index: 0 — left slider position, 1 — right slider position. Default: 0
     var selectedIndex: Int { get set }
@@ -115,7 +116,7 @@ public protocol SliderControlProtocol {
 
         - Returns: A new Slider Control
      */
-    init(sliderTitle: String, leftSideTitle: String, rightSideTitle: String)
+//    init(sliderTitle: String, leftSideTitle: String, rightSideTitle: String)
 }
 
 
@@ -124,28 +125,19 @@ public protocol SliderControlProtocol {
 
     // MARK: Public interface. SliderControlProtocol
 
-    public var leftSideTitle: String {
-        get {
-            return leftLabel.text!
-        }
-        set {
-            leftLabel.text = newValue
+    public var leftSideTitle: String? {
+        didSet {
+            leftLabel.text = leftSideTitle
         }
     }
-    public var rightSideTitle: String {
-        get {
-            return rightLabel.text!
-        }
-        set {
-            rightLabel.text = newValue
+    public var rightSideTitle: String? {
+        didSet {
+            rightLabel.text = rightSideTitle
         }
     }
-    public var sliderTitle: String {
-        get {
-            return sliderViewLabel.text!
-        }
-        set {
-            sliderViewLabel.text = newValue
+    public var sliderTitle: String? {
+        didSet {
+            sliderViewLabel.text = sliderTitle
         }
     }
     public var selectedIndex = 0
@@ -153,7 +145,6 @@ public protocol SliderControlProtocol {
     public var sliderLabelInset: CGFloat = SliderConstants.defaultSliderViewInset {
         didSet {
             setNeedsLayout()
-            setNeedsDisplay()
         }
     }
     public override var isEnabled: Bool {
@@ -194,12 +185,12 @@ public protocol SliderControlProtocol {
     }
     @IBInspectable public var sliderFirstBackgroundColor: UIColor = SliderDefaultColors.sliderFirstBackgroundColor {
         didSet {
-            setNeedsDisplay()
+            sliderViewGradientLayer.colors = [sliderFirstBackgroundColor, sliderSecondBackgroundColor].map { $0.cgColor }
         }
     }
     @IBInspectable public var sliderSecondBackgroundColor: UIColor = SliderDefaultColors.sliderSecondBackgroundColor {
         didSet {
-            setNeedsDisplay()
+            sliderViewGradientLayer.colors = [sliderFirstBackgroundColor, sliderSecondBackgroundColor].map { $0.cgColor }
         }
     }
     @IBInspectable public var sliderTextColor: UIColor = SliderDefaultColors.sliderTextColor {
@@ -241,56 +232,19 @@ public protocol SliderControlProtocol {
         rightBackgroundView.backgroundColor = rightSideBackgroundColor
         return rightBackgroundView
     }()
-    fileprivate lazy var leftLabel: UILabel = {
-        let leftLabel = UILabel()
-        leftLabel.textAlignment = .left
-        leftLabel.font = leftLabelTitleFont
-        leftLabel.textColor = leftLabelTextColor
-        leftLabel.minimumScaleFactor = 0.5
-        leftLabel.adjustsFontSizeToFitWidth = true
-        leftLabel.numberOfLines = 0
-        return leftLabel
-    }()
-    fileprivate lazy var rightLabel: UILabel = {
-        let rightLabel = UILabel()
-        rightLabel.textAlignment = .right
-        rightLabel.font = rightLabelTitleFont
-        rightLabel.textColor = rightLabelTextColor
-        rightLabel.minimumScaleFactor = 0.5
-        rightLabel.adjustsFontSizeToFitWidth = true
-        rightLabel.numberOfLines = 0
-        return rightLabel
-    }()
-    fileprivate var sliderView = UIView()
-    fileprivate lazy var sliderViewLabel: UILabel = {
-        let sliderViewLabel = UILabel()
-        sliderViewLabel.textAlignment = .center
-        sliderViewLabel.font = sliderTitleFont
-        sliderViewLabel.textColor = sliderTextColor
-        sliderViewLabel.minimumScaleFactor = 0.5
-        sliderViewLabel.adjustsFontSizeToFitWidth = true
-        sliderViewLabel.numberOfLines = 0
-        return sliderViewLabel
-    }()
-    fileprivate var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-    fileprivate var tapGesture: UITapGestureRecognizer!
-    fileprivate var panGesture: UIPanGestureRecognizer!
+    fileprivate lazy var leftLabel: UILabel = createEmptyLabel(textAlignment: .left, font: leftLabelTitleFont, textColor: leftLabelTextColor)
+    fileprivate lazy var rightLabel: UILabel = createEmptyLabel(textAlignment: .right, font: rightLabelTitleFont, textColor: rightLabelTextColor)
+    fileprivate lazy var sliderViewLabel: UILabel = createEmptyLabel(textAlignment: .center, font: sliderTitleFont, textColor: sliderTextColor)
+    fileprivate let sliderView = UIView()
+    fileprivate let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    fileprivate lazy var tapGesture = UITapGestureRecognizer(target: self, action: #selector(tap))
+    fileprivate lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan))
     fileprivate let sliderViewShadowLayer = CAShapeLayer()
     fileprivate let sliderViewGradientLayer = CAGradientLayer()
-    fileprivate var initialSliderLabelFrame: CGRect?
+    fileprivate var initialSliderViewFrame: CGRect?
 
 
     // MARK: Initializers
-
-    required public init(sliderTitle: String, leftSideTitle: String, rightSideTitle: String) {
-        super.init(frame: CGRect.zero)
-
-        self.sliderTitle = sliderTitle
-        self.leftSideTitle = leftSideTitle
-        self.rightSideTitle = rightSideTitle
-
-        commonInit()
-    }
 
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -309,73 +263,43 @@ public protocol SliderControlProtocol {
         addSubview(rightBackgroundView)
         leftBackgroundView.addSubview(leftLabel)
         rightBackgroundView.addSubview(rightLabel)
+
         sliderView.addSubview(sliderViewLabel)
         sliderView.addSubview(activityIndicator)
         addSubview(sliderView)
 
-        tapGesture = UITapGestureRecognizer(target: self, action: #selector(tap))
         addGestureRecognizer(tapGesture)
-
-        panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan))
-        panGesture.delegate = self
         addGestureRecognizer(panGesture)
-    }
-
-    open override func draw(_ rect: CGRect) {
-        super.draw(rect)
-
-        drawSliderViewLayers()
-    }
-
-    fileprivate func drawSliderViewLayers() {
-        [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
-
-        sliderViewShadowLayer.path = UIBezierPath(roundedRect: sliderView.bounds, cornerRadius: sliderView.bounds.height / 2).cgPath
-        sliderViewShadowLayer.fillColor = UIColor.clear.cgColor
-        sliderViewShadowLayer.shadowColor = UIColor.black.cgColor
-        sliderViewShadowLayer.shadowPath = sliderViewShadowLayer.path
-        sliderViewShadowLayer.shadowOffset = SliderConstants.sliderViewShadowOffset
-        sliderViewShadowLayer.shadowOpacity = SliderConstants.sliderViewShadowOpacity
-        sliderViewShadowLayer.shadowRadius = SliderConstants.sliderViewShadowRadius
-        sliderView.layer.insertSublayer(sliderViewShadowLayer, below: sliderViewLabel.layer)
-
-        sliderViewGradientLayer.colors = [sliderFirstBackgroundColor, sliderSecondBackgroundColor].map { $0.cgColor }
-        sliderViewGradientLayer.startPoint = CGPoint(x: 0, y: 0)
-        sliderViewGradientLayer.endPoint = CGPoint(x: 0, y: 1)
-        sliderViewGradientLayer.frame = sliderView.bounds
-        sliderViewGradientLayer.cornerRadius = sliderView.bounds.height / 2
-        sliderViewGradientLayer.masksToBounds = true
-        sliderView.layer.insertSublayer(sliderViewGradientLayer, below: sliderViewLabel.layer)
+        panGesture.delegate = self
     }
 
 
     // MARK: Gestures
 
-    @objc func tap(_ gesture: UITapGestureRecognizer!) {
+    @objc func tap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: self)
         let index = Int(location.x / (bounds.width / CGFloat(SliderConstants.numberOfLabels)))
         setSelectedIndex(index, animated: true)
     }
 
-    @objc func pan(_ gesture: UIPanGestureRecognizer!) {
+    @objc func pan(_ gesture: UIPanGestureRecognizer) {
         switch gesture.state {
-        case .began:
-            initialSliderLabelFrame = sliderView.frame
+        case .possible, .began:
+            initialSliderViewFrame = sliderView.frame
             break
         case .changed:
-            var frame = initialSliderLabelFrame!
+            guard var frame = initialSliderViewFrame else { return }
             frame.origin.x += gesture.translation(in: self).x
             frame.origin.x = max(min(frame.origin.x, bounds.width - sliderLabelInset - frame.width), sliderLabelInset)
             sliderView.frame = frame
-            leftBackgroundView.alpha = frame.origin.x / bounds.width
-            rightBackgroundView.alpha = 1 - frame.origin.x / bounds.width
+            leftBackgroundView.alpha = frame.maxX / bounds.width
+            rightBackgroundView.alpha = 1 - frame.maxX / bounds.width
             break
         case .ended, .failed, .cancelled:
+            guard initialSliderViewFrame != nil else { return }
             let index = Int(sliderView.center.x / (bounds.width / CGFloat(SliderConstants.numberOfLabels)))
             setSelectedIndex(index, animated: true)
-            break
-
-        case .possible:
+            initialSliderViewFrame = nil
             break
         }
     }
@@ -408,7 +332,6 @@ public protocol SliderControlProtocol {
 
     override public func layoutSubviews() {
         super.layoutSubviews()
-         setNeedsDisplay()
 
         let sliderSideSize = bounds.height - sliderLabelInset * 2
         sliderView.frame = CGRect(x: fabs(CGFloat(selectedIndex) * (bounds.width - sliderSideSize) - sliderLabelInset), y: sliderLabelInset, width:  sliderSideSize, height: sliderSideSize)
@@ -426,6 +349,8 @@ public protocol SliderControlProtocol {
         rightBackgroundView.alpha = selectedIndex == 1 ? 0 : 1
 
         activityIndicator.center = CGPoint(x: sliderSideSize / 2, y: sliderSideSize / 2)
+
+        createSliderViewLayers()
     }
 
     override public func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -445,6 +370,38 @@ public protocol SliderControlProtocol {
 
     override public class var layerClass : AnyClass {
         return SliderMainLayer.self
+    }
+
+    fileprivate func createEmptyLabel(textAlignment: NSTextAlignment, font: UIFont, textColor: UIColor) -> UILabel {
+        let emptyLabel = UILabel()
+        emptyLabel.textAlignment = textAlignment
+        emptyLabel.font = font
+        emptyLabel.textColor = textColor
+        emptyLabel.minimumScaleFactor = SliderConstants.fontMinimumScaleFactor
+        emptyLabel.adjustsFontSizeToFitWidth = true
+        emptyLabel.numberOfLines = 0
+        return emptyLabel
+    }
+
+    fileprivate func createSliderViewLayers() {
+        [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
+
+        sliderViewShadowLayer.path = UIBezierPath(roundedRect: sliderView.bounds, cornerRadius: sliderView.bounds.height / 2).cgPath
+        sliderViewShadowLayer.fillColor = UIColor.clear.cgColor
+        sliderViewShadowLayer.shadowColor = UIColor.black.cgColor
+        sliderViewShadowLayer.shadowPath = sliderViewShadowLayer.path
+        sliderViewShadowLayer.shadowOffset = SliderConstants.sliderViewShadowOffset
+        sliderViewShadowLayer.shadowOpacity = SliderConstants.sliderViewShadowOpacity
+        sliderViewShadowLayer.shadowRadius = SliderConstants.sliderViewShadowRadius
+        sliderView.layer.insertSublayer(sliderViewShadowLayer, below: sliderViewLabel.layer)
+
+        sliderViewGradientLayer.colors = [sliderFirstBackgroundColor, sliderSecondBackgroundColor].map { $0.cgColor }
+        sliderViewGradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        sliderViewGradientLayer.endPoint = CGPoint(x: 0, y: 1)
+        sliderViewGradientLayer.frame = sliderView.bounds
+        sliderViewGradientLayer.cornerRadius = sliderView.bounds.height / 2
+        sliderViewGradientLayer.masksToBounds = true
+        sliderView.layer.insertSublayer(sliderViewGradientLayer, below: sliderViewLabel.layer)
     }
 
 }

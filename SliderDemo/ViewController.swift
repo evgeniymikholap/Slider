@@ -22,9 +22,10 @@ class ViewController: UIViewController {
         slider.rightSideTitle = NSLocalizedString("slider.right-label.text.slide-to-start", comment: "")
         slider.sliderTitle = NSLocalizedString("slider.main.text.start", comment: "").localizedUppercase
 
-        let slider2 = SliderControl(sliderTitle: NSLocalizedString("slider.main.text.checkin", comment: "").localizedCapitalized,
-                                    leftSideTitle: NSLocalizedString("slider.left-label.text.checkin", comment: ""),
-                                    rightSideTitle: NSLocalizedString("slider.right-label.text.slide-to-checkin", comment: ""))
+        let slider2 = SliderControl()
+        slider2.sliderTitle = NSLocalizedString("slider.main.text.checkin", comment: "").localizedCapitalized
+        slider2.leftSideTitle = NSLocalizedString("slider.left-label.text.checkin", comment: "")
+        slider2.rightSideTitle = NSLocalizedString("slider.right-label.text.slide-to-checkin", comment: "")
         slider2.frame = CGRect(x: 50.0, y: 20.0, width: view.bounds.width - 100.0, height: 100.0)
         slider2.autoresizingMask = [.flexibleWidth]
         view.addSubview(slider2)
