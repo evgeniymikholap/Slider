@@ -324,15 +324,12 @@ public protocol SliderControlProtocol {
     open override func draw(_ rect: CGRect) {
         super.draw(rect)
 
-        [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
-
-        layer.cornerRadius = bounds.height / 2
-        layer.masksToBounds = true
-
         drawSliderViewLayers()
     }
 
     fileprivate func drawSliderViewLayers() {
+        [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
+
         sliderViewShadowLayer.path = UIBezierPath(roundedRect: sliderView.bounds, cornerRadius: sliderView.bounds.height / 2).cgPath
         sliderViewShadowLayer.fillColor = UIColor.clear.cgColor
         sliderViewShadowLayer.shadowColor = UIColor.black.cgColor
@@ -383,7 +380,7 @@ public protocol SliderControlProtocol {
         }
     }
 
-    open func setSelectedIndex(_ selectedIndex: Int, animated: Bool, animationDelay: TimeInterval = 0) {
+    public func setSelectedIndex(_ selectedIndex: Int, animated: Bool, animationDelay: TimeInterval = 0) {
         let catchHalfSwitch = self.selectedIndex == selectedIndex
 
         self.selectedIndex = selectedIndex
@@ -407,9 +404,9 @@ public protocol SliderControlProtocol {
     }
 
 
-    // MARK: - Layout
+    // MARK: Layout
 
-    override open func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
          setNeedsDisplay()
 
@@ -431,7 +428,7 @@ public protocol SliderControlProtocol {
         activityIndicator.center = CGPoint(x: sliderSideSize / 2, y: sliderSideSize / 2)
     }
 
-    open override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override public func sizeThatFits(_ size: CGSize) -> CGSize {
         var fittingSize = size
         if size.height < SliderConstants.minHeight {
             fittingSize.height = SliderConstants.minHeight
@@ -444,6 +441,24 @@ public protocol SliderControlProtocol {
         }
 
         return fittingSize
+    }
+
+    override public class var layerClass : AnyClass {
+        return SliderMainLayer.self
+    }
+
+}
+
+
+// MARK: - Custom main layer for Slider Control
+
+fileprivate class SliderMainLayer: CALayer {
+
+    override var bounds: CGRect {
+        didSet {
+            cornerRadius = bounds.height / 2
+            masksToBounds = true
+        }
     }
 
 }
