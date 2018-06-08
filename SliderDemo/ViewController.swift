@@ -35,7 +35,7 @@ class ViewController: UIViewController {
         slider3.leftSideTitle = NSLocalizedString("slider.left-label.text.slide-to-lock", comment: "")
         slider3.isEnabled = false
 
-        slider4.selectedIndex = 1
+        slider4.change(position: .right, animated: false)
         slider4.rightSideTitle = NSLocalizedString("slider.right-label.text.slide-to-unlock", comment: "")
         slider4.sliderTitle = NSLocalizedString("slider.main.text.stop", comment: "").localizedUppercase
         slider4.leftSideTitle = NSLocalizedString("slider.left-label.text.slide-to-lock", comment: "")
@@ -44,13 +44,13 @@ class ViewController: UIViewController {
 
     @IBAction func sliderValueChanged(_ sender: SliderControl) {
         sender.showActivityIndicator()
-        sender.sliderTitle = NSLocalizedString(sender.selectedIndex == 0 ? "slider.main.text.start" : "slider.main.text.stop", comment: "").localizedUppercase
+        sender.sliderTitle = NSLocalizedString(sender.position == .left ? "slider.main.text.start" : "slider.main.text.stop", comment: "").localizedUppercase
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             sender.hideActivityIndicator()
 
-            sender.rightSideTitle =  NSLocalizedString(sender.selectedIndex == 0 ? "slider.right-label.text.slide-to-start" : "slider.label.text.requesting", comment: "")
-            sender.leftSideTitle =  NSLocalizedString(sender.selectedIndex == 0 ? "slider.label.text.requesting" : "slider.label.text.done", comment: "")
+            sender.rightSideTitle =  NSLocalizedString(sender.position == .left ? "slider.right-label.text.slide-to-start" : "slider.label.text.requesting", comment: "")
+            sender.leftSideTitle =  NSLocalizedString(sender.position == .left ? "slider.label.text.requesting" : "slider.label.text.done", comment: "")
         }
     }
 }

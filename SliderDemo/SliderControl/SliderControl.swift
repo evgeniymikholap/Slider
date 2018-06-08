@@ -20,6 +20,7 @@ private struct SliderConstants {
     static let defaultSliderLabelFont          = UIFont.systemFont(ofSize: 15, weight: .medium)
     static let defaultLabelFont                = UIFont.systemFont(ofSize: 16, weight: .medium)
     static let animationDuration               = 0.3
+    static let animationDelay: TimeInterval    = 0
     static let sliderViewShadowOpacity: Float  = 0.2
     static let sliderViewShadowRadius: CGFloat = 2
     static let sliderViewShadowOffset          = CGSize(width: 0, height: 0)
@@ -50,6 +51,13 @@ public enum SliderState {
 }
 
 
+/// Slider View position
+public enum SliderPosition: Int {
+    case left = 0
+    case right
+}
+
+
 /// Public interface for the Slider Control
 public protocol SliderControlProtocol {
     /// Left label title
@@ -61,13 +69,13 @@ public protocol SliderControlProtocol {
     /// Slider label title
     var sliderTitle: String? { get }
 
-    /// Selected Index: 0 — left slider position, 1 — right slider position. Default: 0
-    var selectedIndex: Int { get set }
+    /// Slider View position. Read-only. Default: `.left`
+    var position: SliderPosition { get }
 
-    /// Slider Control state. Default: .normal
+    /// Slider Control state. Default: `.normal`
     var controlState: SliderState { get set }
 
-    /// Slider View inset. Default: SliderConstants.defaultSliderViewInset
+    /// Slider View inset. Default: `SliderConstants.defaultSliderViewInset`
     var sliderLabelInset: CGFloat { get set }
 
     /// Enable/Disable flag
@@ -82,25 +90,25 @@ public protocol SliderControlProtocol {
     /// Right label font
     var rightLabelTitleFont: UIFont { get set }
 
-    /// Left side view background color. IBInspectable. Default: SliderColors.leftSideBackgroundColor
+    /// Left side view background color. IBInspectable. Default: `SliderColors.leftSideBackgroundColor`
     var leftSideBackgroundColor: UIColor { get set }
 
-    /// Right side view background color. IBInspectable. Default: SliderColors.rightSideBackgroundColor
+    /// Right side view background color. IBInspectable. Default: `SliderColors.rightSideBackgroundColor`
     var rightSideBackgroundColor: UIColor { get set }
 
-    /// Top color of Slider view gradient. IBInspectable. Default: SliderColors.sliderFirstBackgroundColor
+    /// Top color of Slider view gradient. IBInspectable. Default: `SliderColors.sliderFirstBackgroundColor`
     var sliderFirstBackgroundColor: UIColor { get set }
 
-    /// Bottom color of Slider view gradient. IBInspectable. Default: SliderColors.sliderSecondBackgroundColor
+    /// Bottom color of Slider view gradient. IBInspectable. Default: `SliderColors.sliderSecondBackgroundColor`
     var sliderSecondBackgroundColor: UIColor { get set }
 
-    /// Slider label text color. Default: SliderColors.sliderTextColor
+    /// Slider label text color. Default: `SliderColors.sliderTextColor`
     var sliderTextColor: UIColor { get set }
 
-    /// Left label text color. Default: SliderColors.leftLabelTextColor
+    /// Left label text color. Default: `SliderColors.leftLabelTextColor`
     var leftLabelTextColor: UIColor { get set }
 
-    /// Right label text color. Default: SliderColors.rightLabelTextColor
+    /// Right label text color. Default: `SliderColors.rightLabelTextColor`
     var rightLabelTextColor: UIColor { get set }
 
     /// Shows system activity indicator
@@ -110,13 +118,12 @@ public protocol SliderControlProtocol {
     func hideActivityIndicator()
 
     /**
-        Initializes a new Slider Control
+     Changes Slider View position
 
-        - Parameter sliderTitle: slider label title
-
-        - Returns: A new Slider Control
+     - Parameter position: `.right` or `.left` Slider View position
+     - Parameter animated: if `true`, Slider view is being updated using an animation
      */
-//    init(sliderTitle: String, leftSideTitle: String, rightSideTitle: String)
+    func change(position: SliderPosition, animated: Bool)
 }
 
 
@@ -140,7 +147,7 @@ public protocol SliderControlProtocol {
             sliderViewLabel.text = sliderTitle
         }
     }
-    public var selectedIndex = 0
+    private(set) public var position: SliderPosition = .left
     public var controlState: SliderState = .normal
     public var sliderLabelInset: CGFloat = SliderConstants.defaultSliderViewInset {
         didSet {
@@ -219,6 +226,31 @@ public protocol SliderControlProtocol {
         sliderViewLabel.isHidden = false
     }
 
+    public func change(position: SliderPosition, animated: Bool) {
+        let catchHalfSwitch = self.position == position
+        self.position = position
+
+        if animated {
+            if !catchHalfSwitch && controlState != .error {
+                self.sendActions(for: .valueChanged)
+            }
+
+            UIViewPropertyAnimator.runningPropertyAnimator(withDuration: SliderConstants.animationDuration,
+                                                           delay: SliderConstants.animationDelay,
+                                                           options: [.beginFromCurrentState, .curveEaseOut],
+                                                           animations: {
+                self.layoutSubviews()
+            }, completion: { _ in
+                if self.controlState == .error {
+                    self.sendActions(for: .valueChanged)
+                }
+            })
+        } else {
+            layoutSubviews()
+            sendActions(for: .valueChanged)
+        }
+    }
+
 
     // MARK: Private variables
 
@@ -246,18 +278,27 @@ public protocol SliderControlProtocol {
 
     // MARK: Initializers
 
-    override public init(frame: CGRect) {
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        commonInit()
+    }
+
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         commonInit()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    public convenience init(position: SliderPosition) {
+        self.init(frame: .zero)
+
+        self.position = position
+
         commonInit()
     }
 
     fileprivate func commonInit() {
         sizeToFit()
+//        translatesAutoresizingMaskIntoConstraints = false
 
         addSubview(leftBackgroundView)
         addSubview(rightBackgroundView)
@@ -279,7 +320,7 @@ public protocol SliderControlProtocol {
     @objc func tap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: self)
         let index = Int(location.x / (bounds.width / CGFloat(SliderConstants.numberOfLabels)))
-        setSelectedIndex(index, animated: true)
+        change(position: index == 0 ? .left : .right , animated: true)
     }
 
     @objc func pan(_ gesture: UIPanGestureRecognizer) {
@@ -298,43 +339,28 @@ public protocol SliderControlProtocol {
         case .ended, .failed, .cancelled:
             guard initialSliderViewFrame != nil else { return }
             let index = Int(sliderView.center.x / (bounds.width / CGFloat(SliderConstants.numberOfLabels)))
-            setSelectedIndex(index, animated: true)
+            change(position: index == 0 ? .left : .right , animated: true)
             initialSliderViewFrame = nil
             break
-        }
-    }
-
-    public func setSelectedIndex(_ selectedIndex: Int, animated: Bool, animationDelay: TimeInterval = 0) {
-        let catchHalfSwitch = self.selectedIndex == selectedIndex
-
-        self.selectedIndex = selectedIndex
-
-        if animated {
-            if !catchHalfSwitch && controlState != .error {
-                self.sendActions(for: .valueChanged)
-            }
-
-            UIViewPropertyAnimator.runningPropertyAnimator(withDuration: SliderConstants.animationDuration, delay: animationDelay, options: [.beginFromCurrentState, .curveEaseOut], animations: {
-                self.layoutSubviews()
-            }, completion: { _ in
-                if self.controlState == .error {
-                    self.sendActions(for: .valueChanged)
-                }
-            })
-        } else {
-            layoutSubviews()
-            sendActions(for: .valueChanged)
         }
     }
 
 
     // MARK: Layout
 
+//    override public class var requiresConstraintBasedLayout: Bool {
+//        return true
+//    }
+
+//    public override var intrinsicContentSize: CGSize {
+//        return CGSize(width: SliderConstants.minWidth, height: SliderConstants.minHeight)
+//    }
+
     override public func layoutSubviews() {
         super.layoutSubviews()
 
         let sliderSideSize = bounds.height - sliderLabelInset * 2
-        sliderView.frame = CGRect(x: fabs(CGFloat(selectedIndex) * (bounds.width - sliderSideSize) - sliderLabelInset), y: sliderLabelInset, width:  sliderSideSize, height: sliderSideSize)
+        sliderView.frame = CGRect(x: fabs(CGFloat(position.rawValue) * (bounds.width - sliderSideSize) - sliderLabelInset), y: sliderLabelInset, width:  sliderSideSize, height: sliderSideSize)
 
         sliderViewLabel.frame = sliderView.bounds
         sliderViewLabel.autoresizingMask = [.flexibleHeight, .flexibleWidth]
@@ -345,8 +371,8 @@ public protocol SliderControlProtocol {
         leftBackgroundView.frame = bounds
         rightBackgroundView.frame = bounds
 
-        leftBackgroundView.alpha = selectedIndex == 0 ? 0 : 1
-        rightBackgroundView.alpha = selectedIndex == 1 ? 0 : 1
+        leftBackgroundView.alpha = CGFloat(position.rawValue)
+        rightBackgroundView.alpha = CGFloat(1 - position.rawValue)
 
         activityIndicator.center = CGPoint(x: sliderSideSize / 2, y: sliderSideSize / 2)
 
