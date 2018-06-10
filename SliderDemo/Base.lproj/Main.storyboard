@@ -23,7 +23,24 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="70" id="OTX-Kp-80n"/>
+                                    <constraint firstAttribute="height" constant="40" id="ZVW-QX-cQW"/>
                                 </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="OTX-Kp-80n"/>
+                                        <exclude reference="ZVW-QX-cQW"/>
+                                    </mask>
+                                </variation>
+                                <variation key="heightClass=compact">
+                                    <mask key="constraints">
+                                        <include reference="ZVW-QX-cQW"/>
+                                    </mask>
+                                </variation>
+                                <variation key="heightClass=regular">
+                                    <mask key="constraints">
+                                        <include reference="OTX-Kp-80n"/>
+                                    </mask>
+                                </variation>
                                 <connections>
                                     <action selector="sliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="YaN-y7-4uC"/>
                                 </connections>
@@ -69,6 +86,14 @@
                                 </variation>
                                 <variation key="heightClass=regular-widthClass=compact" axis="vertical"/>
                             </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CE0-tY-8Si">
+                                <rect key="frame" x="258" y="201" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="didTouchButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HkO-hA-fvG"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -82,6 +107,7 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="heightConstraint" destination="OTX-Kp-80n" id="PDN-PB-fdo"/>
                         <outlet property="slider" destination="HV7-3s-SXG" id="z4c-Ue-7zq"/>
                         <outlet property="slider3" destination="jVe-cs-lmL" id="DX1-2g-D5g"/>
                         <outlet property="slider4" destination="npk-7L-XHA" id="EsZ-mk-Qwq"/>

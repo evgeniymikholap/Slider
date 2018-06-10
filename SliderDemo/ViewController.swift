@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var slider: SliderControl!
     @IBOutlet weak var slider3: SliderControl!
     @IBOutlet weak var slider4: SliderControl!
+    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,6 +53,10 @@ class ViewController: UIViewController {
             sender.rightSideTitle =  NSLocalizedString(sender.position == .left ? "slider.right-label.text.slide-to-start" : "slider.label.text.requesting", comment: "")
             sender.leftSideTitle =  NSLocalizedString(sender.position == .left ? "slider.label.text.requesting" : "slider.label.text.done", comment: "")
         }
+    }
+
+    @IBAction func didTouchButton(_ sender: UIButton) {
+        heightConstraint.constant = heightConstraint.constant == 70 ? 20 : 70
     }
 }
 
