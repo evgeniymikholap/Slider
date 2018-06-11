@@ -155,14 +155,21 @@ public protocol SliderControlProtocol {
             alpha = isSliderEnabled ? 1 : alpha / 2
         }
     }
+    public override var isEnabled: Bool {
+        didSet {
+            if isEnabled != isSliderEnabled {
+                isSliderEnabled = isEnabled
+            }
+        }
+    }
     public var leftLabelTitleFont = SliderConstants.defaultLabelFont {
         didSet {
-            leftLabel.font = leftLabelTitleFont
+            leftLabel.font = SliderConstants.fontMetrics.scaledFont(for: leftLabelTitleFont)
         }
     }
     public var rightLabelTitleFont = SliderConstants.defaultLabelFont {
         didSet {
-            rightLabel.font = rightLabelTitleFont
+            rightLabel.font = SliderConstants.fontMetrics.scaledFont(for: rightLabelTitleFont)
         }
     }
     @IBInspectable public var leftSideBackgroundColor: UIColor = SliderDefaultColors.leftSideBackgroundColor {
@@ -514,7 +521,7 @@ private class SliderToggleContainerView: UIView {
     }()
     public var isShadow: Bool = true {
         didSet {
-            shadowLayer.removeFromSuperlayer()
+            shadowLayer.isHidden = !isShadow
         }
     }
     public var shadowColor: UIColor = SliderDefaultColors.toggleShadowColor {

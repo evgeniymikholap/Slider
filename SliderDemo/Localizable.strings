@@ -11,9 +11,14 @@
 "slider.label.text.done"                   = "done";
 "slider.left-label.text.checkin"           = "check-in…";
 "slider.left-label.text.slide-to-lock"     = "slide to lock";
+"slider.left-label.text.stop"              = "stop";
+"slider.left-label.text.off"              = "off";
 "slider.right-label.text.slide-to-start"   = "slide to start";
 "slider.right-label.text.slide-to-checkin" = "slide to check-in";
 "slider.right-label.text.slide-to-unlock"  = "slide to unlock";
+"slider.right-label.text.start"            = "start";
+"slider.right-label.text.on"               = "on";
 "slider.main.text.start"                   = "start";
 "slider.main.text.stop"                    = "stop";
 "slider.main.text.checkin"                 = "check-in";
+"slider.test.text"                         = "test text";
