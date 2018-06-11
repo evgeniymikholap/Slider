@@ -58,7 +58,7 @@ public enum SliderPosition: Int {
 // MARK: - Public interface for the Slider Control
 
 public protocol SliderControlProtocol {
-    /// Toggle View
+    /// Custom Toggle View. Default: `SliderToggleView()`
     var customToggleView: UIView { get set }
 
     /// Left label title
@@ -73,8 +73,8 @@ public protocol SliderControlProtocol {
     /// Slider View inset. Default: `SliderConstants.defaultSliderViewInset`
     var contentInset: CGFloat { get set }
 
-    /// Enable/Disable flag
-    var isEnabled: Bool { get set }
+    /// A Boolean value that determines whether the Slider Control is enabled. Default: `true`
+    var isSliderEnabled: Bool { get set }
 
     /// Left label font
     var leftLabelTitleFont: UIFont { get set }
@@ -94,11 +94,20 @@ public protocol SliderControlProtocol {
     /// Right label text color. Default: `SliderColors.rightLabelTextColor`
     var rightLabelTextColor: UIColor { get set }
 
-    var isShadow: Bool { get set }
-    var shadowColor: UIColor { get set }
-    var shadowOffset: CGSize { get set }
-    var shadowOpacity: Float { get set }
-    var shadowRadius: CGFloat { get set }
+    /// A Boolean value that determines whether the Toggle Shadow is shown. Default: `true`
+    var isToggleShadow: Bool { get set }
+
+    /// The color of the Toggle’s shadow. Default: `SliderDefaultColors.toggleShadowColor`
+    var toggleShadowColor: UIColor { get set }
+
+    /// The offset (in points) of the Toggle’s shadow. Default: `SliderConstants.toggleViewShadowOffset`
+    var toggleShadowOffset: CGSize { get set }
+
+    /// The opacity of the Toggle’s shadow. Default: `SliderConstants.toggleViewShadowOpacity`
+    var toggleShadowOpacity: Float { get set }
+
+    /// The blur radius (in points) used to render the Toggle’s shadow. Default: `SliderConstants.toggleViewShadowRadius`
+    var toggleShadowRadius: CGFloat { get set }
 
     /**
      Changes Slider View position
@@ -137,9 +146,10 @@ public protocol SliderControlProtocol {
             setNeedsLayout()
         }
     }
-    public override var isEnabled: Bool {
+    @IBInspectable public var isSliderEnabled: Bool = true {
         didSet {
-            alpha = isEnabled ? 1 : alpha / 2
+            isEnabled = isSliderEnabled
+            alpha = isSliderEnabled ? 1 : alpha / 2
         }
     }
     public var leftLabelTitleFont = SliderConstants.defaultLabelFont {
@@ -172,29 +182,29 @@ public protocol SliderControlProtocol {
             rightLabel.textColor = rightLabelTextColor
         }
     }
-    @IBInspectable public var isShadow: Bool = true {
+    @IBInspectable public var isToggleShadow: Bool = true {
         didSet {
-            toggleContainerView.isShadow = isShadow
+            toggleContainerView.isShadow = isToggleShadow
         }
     }
-    @IBInspectable public var shadowColor: UIColor = SliderDefaultColors.toggleShadowColor {
+    @IBInspectable public var toggleShadowColor: UIColor = SliderDefaultColors.toggleShadowColor {
         didSet {
-            toggleContainerView.shadowColor = shadowColor
+            toggleContainerView.shadowColor = toggleShadowColor
         }
     }
-    @IBInspectable public var shadowOffset: CGSize = SliderConstants.toggleViewShadowOffset {
+    @IBInspectable public var toggleShadowOffset: CGSize = SliderConstants.toggleViewShadowOffset {
         didSet {
-            toggleContainerView.shadowOffset = shadowOffset
+            toggleContainerView.shadowOffset = toggleShadowOffset
         }
     }
-    @IBInspectable public var shadowOpacity: Float = SliderConstants.toggleViewShadowOpacity {
+    @IBInspectable public var toggleShadowOpacity: Float = SliderConstants.toggleViewShadowOpacity {
         didSet {
-            toggleContainerView.shadowOpacity = shadowOpacity
+            toggleContainerView.shadowOpacity = toggleShadowOpacity
         }
     }
-    @IBInspectable public var shadowRadius: CGFloat = SliderConstants.toggleViewShadowRadius {
+    @IBInspectable public var toggleShadowRadius: CGFloat = SliderConstants.toggleViewShadowRadius {
         didSet {
-            toggleContainerView.shadowRadius = shadowRadius
+            toggleContainerView.shadowRadius = toggleShadowRadius
         }
     }
 
@@ -362,9 +372,13 @@ public protocol SliderControlProtocol {
             if position == .left {
                 layoutConstant = max(min(layoutConstant, freeDistance), contentInset)
                 toggleContainerViewLeadingLayoutConstraint.constant = layoutConstant
+                leftBackgroundView.alpha = layoutConstant / bounds.width
+                rightBackgroundView.alpha = 1 - layoutConstant / bounds.width
             } else {
                 layoutConstant = min(max(layoutConstant, -freeDistance), -contentInset)
                 toggleContainerViewTrailingLayoutConstraint.constant = layoutConstant
+                leftBackgroundView.alpha = 1 - fabs(layoutConstant) / bounds.width
+                rightBackgroundView.alpha = fabs(layoutConstant) / bounds.width
             }
 
             break
