@@ -143,7 +143,10 @@ public protocol SliderControlProtocol {
     private(set) public var position: SliderPosition = .left
     public var contentInset: CGFloat = SliderConstants.defaultSliderViewInset {
         didSet {
-            setNeedsLayout()
+            toggleContainerViewLeadingLayoutConstraint.constant = contentInset
+            toggleContainerViewTrailingLayoutConstraint.constant = -contentInset
+            toggleContainerViewTopLayoutConstraint.constant = contentInset
+            toggleContainerViewBottomLayoutConstraint.constant = -contentInset
         }
     }
     @IBInspectable public var isSliderEnabled: Bool = true {
@@ -267,12 +270,14 @@ public protocol SliderControlProtocol {
     }()
     private lazy var tapGesture = UITapGestureRecognizer(target: self, action: #selector(tap))
     private lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan))
-    private lazy var leftLabelLeadingLayoutConstraint: NSLayoutConstraint = leftLabel.leadingAnchor.constraint(equalTo: leadingAnchor)
-    private lazy var leftLabelTrailingLayoutConstraint: NSLayoutConstraint = leftLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
-    private lazy var rightLabelLeadingLayoutConstraint: NSLayoutConstraint = rightLabel.leadingAnchor.constraint(equalTo: leadingAnchor)
-    private lazy var rightLabelTrailingLayoutConstraint: NSLayoutConstraint = rightLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
-    private lazy var toggleContainerViewLeadingLayoutConstraint: NSLayoutConstraint = toggleContainerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: contentInset)
-    private lazy var toggleContainerViewTrailingLayoutConstraint: NSLayoutConstraint = toggleContainerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -contentInset)
+    private lazy var leftLabelLeadingLayoutConstraint = leftLabel.leadingAnchor.constraint(equalTo: leadingAnchor)
+    private lazy var leftLabelTrailingLayoutConstraint = leftLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
+    private lazy var rightLabelLeadingLayoutConstraint = rightLabel.leadingAnchor.constraint(equalTo: leadingAnchor)
+    private lazy var rightLabelTrailingLayoutConstraint = rightLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
+    private lazy var toggleContainerViewLeadingLayoutConstraint = toggleContainerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: contentInset)
+    private lazy var toggleContainerViewTopLayoutConstraint = toggleContainerView.topAnchor.constraint(equalTo: topAnchor, constant: contentInset)
+    private lazy var toggleContainerViewTrailingLayoutConstraint = toggleContainerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -contentInset)
+    private lazy var toggleContainerViewBottomLayoutConstraint = toggleContainerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -contentInset)
     private var initialToggleContainerViewConstant: CGFloat?
 
 
@@ -334,9 +339,9 @@ public protocol SliderControlProtocol {
                                         rightLabelTrailingLayoutConstraint,
                                         rightLabel.bottomAnchor.constraint(equalTo: bottomAnchor)])
         constraints.append(contentsOf: [toggleContainerViewLeadingLayoutConstraint,
-                                        toggleContainerView.topAnchor.constraint(equalTo: topAnchor, constant: contentInset),
+                                        toggleContainerViewTopLayoutConstraint,
                                         toggleContainerView.widthAnchor.constraint(equalTo: toggleContainerView.heightAnchor, multiplier: 1),
-                                        toggleContainerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -contentInset)])
+                                        toggleContainerViewBottomLayoutConstraint])
 
         NSLayoutConstraint.activate(constraints)
     }
@@ -344,6 +349,7 @@ public protocol SliderControlProtocol {
     public override func updateConstraints() {
         leftLabelLeadingLayoutConstraint.constant = bounds.height / 2
         leftLabelTrailingLayoutConstraint.constant = -toggleContainerView.bounds.width - contentInset * 2
+
         rightLabelLeadingLayoutConstraint.constant = toggleContainerView.bounds.width + contentInset * 2
         rightLabelTrailingLayoutConstraint.constant = -bounds.height / 2
 
