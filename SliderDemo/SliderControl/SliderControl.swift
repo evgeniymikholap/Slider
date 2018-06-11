@@ -62,7 +62,7 @@ public enum SliderPosition: Int {
 /// Public interface for the Slider Control
 public protocol SliderControlProtocol {
     /// Toggle View
-    var toggleView: UIView { get set }
+    var customToggleView: UIView { get set }
 
     /// Left label title
     var leftSideTitle: String? { get }
@@ -136,11 +136,11 @@ public protocol SliderControlProtocol {
 
     // MARK: Public interface. SliderControlProtocol
 
-    public lazy var toggleView: UIView = {
-        let view = SliderToggleView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+    public var customToggleView: UIView = SliderToggleView() {
+        didSet {
+            toggleContainerView.addContentView(customToggleView)
+        }
+    }
     public var leftSideTitle: String? {
         didSet {
             leftLabel.text = leftSideTitle
@@ -239,9 +239,9 @@ public protocol SliderControlProtocol {
         let catchHalfSwitch = self.position == position
         self.position = position
 
-        let toggleInset = bounds.width - self.sliderLabelInset - toggleView.bounds.width
-        self.toggleViewLeadingLayoutConstraint.constant = position == .left ? self.sliderLabelInset : toggleInset
-        self.toggleViewTrailingLayoutConstraint.constant = position == .right ? -self.sliderLabelInset : -toggleInset
+        let toggleInset = bounds.width - self.sliderLabelInset - toggleContainerView.bounds.width
+        self.toggleContainerViewLeadingLayoutConstraint.constant = position == .left ? self.sliderLabelInset : toggleInset
+        self.toggleContainerViewTrailingLayoutConstraint.constant = position == .right ? -self.sliderLabelInset : -toggleInset
 
         if animated {
             if !catchHalfSwitch && controlState != .error {
@@ -260,10 +260,14 @@ public protocol SliderControlProtocol {
                     self.sendActions(for: .valueChanged)
                 }
 
-                self.toggleViewTrailingLayoutConstraint.isActive = position == .right
-                self.toggleViewLeadingLayoutConstraint.isActive = position == .left
+                self.toggleContainerViewTrailingLayoutConstraint.isActive = position == .right
+                self.toggleContainerViewLeadingLayoutConstraint.isActive = position == .left
             })
         } else {
+            self.leftBackgroundView.alpha = CGFloat(position.rawValue)
+            self.rightBackgroundView.alpha = CGFloat(1 - position.rawValue)
+            self.toggleContainerViewTrailingLayoutConstraint.isActive = position == .right
+            self.toggleContainerViewLeadingLayoutConstraint.isActive = position == .left
             layoutIfNeeded()
             sendActions(for: .valueChanged)
         }
@@ -286,6 +290,12 @@ public protocol SliderControlProtocol {
     }()
     fileprivate lazy var leftLabel: UILabel = createEmptyLabel(textAlignment: .left, font: leftLabelTitleFont, textColor: leftLabelTextColor)
     fileprivate lazy var rightLabel: UILabel = createEmptyLabel(textAlignment: .right, font: rightLabelTitleFont, textColor: rightLabelTextColor)
+    private lazy var toggleContainerView: SliderToggleContainerView = {
+        let toggleContainerView = SliderToggleContainerView()
+        toggleContainerView.translatesAutoresizingMaskIntoConstraints = false
+        toggleContainerView.addContentView(customToggleView)
+        return toggleContainerView
+    }()
     fileprivate lazy var sliderViewLabel: UILabel = createEmptyLabel(textAlignment: .center, font: sliderTitleFont, textColor: sliderTextColor)
     fileprivate let sliderView = UIView()
     fileprivate let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
@@ -293,14 +303,13 @@ public protocol SliderControlProtocol {
     fileprivate lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(pan))
     fileprivate let sliderViewShadowLayer = CAShapeLayer()
     fileprivate let sliderViewGradientLayer = CAGradientLayer()
-    private var initialToggleViewConstant: CGFloat?
+    private var initialToggleContainerViewConstant: CGFloat?
     private lazy var leftLabelLeadingLayoutConstraint: NSLayoutConstraint = leftLabel.leadingAnchor.constraint(equalTo: leadingAnchor)
     private lazy var leftLabelTrailingLayoutConstraint: NSLayoutConstraint = leftLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
     private lazy var rightLabelLeadingLayoutConstraint: NSLayoutConstraint = rightLabel.leadingAnchor.constraint(equalTo: leadingAnchor)
     private lazy var rightLabelTrailingLayoutConstraint: NSLayoutConstraint = rightLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
-    private lazy var toggleViewLeadingLayoutConstraint: NSLayoutConstraint = toggleView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: sliderLabelInset)
-    private lazy var toggleViewTrailingLayoutConstraint: NSLayoutConstraint = toggleView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -sliderLabelInset)
-    private lazy var toggleViewWidthLayoutConstraint: NSLayoutConstraint = toggleView.widthAnchor.constraint(equalTo: toggleView.heightAnchor, multiplier: 1)
+    private lazy var toggleContainerViewLeadingLayoutConstraint: NSLayoutConstraint = toggleContainerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: sliderLabelInset)
+    private lazy var toggleContainerViewTrailingLayoutConstraint: NSLayoutConstraint = toggleContainerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -sliderLabelInset)
 
 
     // MARK: Initializers
@@ -330,7 +339,7 @@ public protocol SliderControlProtocol {
         leftBackgroundView.addSubview(leftLabel)
         rightBackgroundView.addSubview(rightLabel)
 
-        addSubview(toggleView)
+        addSubview(toggleContainerView)
 
         addGestureRecognizer(tapGesture)
         addGestureRecognizer(panGesture)
@@ -357,18 +366,18 @@ public protocol SliderControlProtocol {
                                         rightLabel.topAnchor.constraint(equalTo: topAnchor),
                                         rightLabelTrailingLayoutConstraint,
                                         rightLabel.bottomAnchor.constraint(equalTo: bottomAnchor)])
-        constraints.append(contentsOf: [toggleViewLeadingLayoutConstraint,
-                                        toggleView.topAnchor.constraint(equalTo: topAnchor, constant: sliderLabelInset),
-                                        toggleViewWidthLayoutConstraint,
-                                        toggleView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -sliderLabelInset)])
+        constraints.append(contentsOf: [toggleContainerViewLeadingLayoutConstraint,
+                                        toggleContainerView.topAnchor.constraint(equalTo: topAnchor, constant: sliderLabelInset),
+                                        toggleContainerView.widthAnchor.constraint(equalTo: toggleContainerView.heightAnchor, multiplier: 1),
+                                        toggleContainerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -sliderLabelInset)])
 
         NSLayoutConstraint.activate(constraints)
     }
 
     public override func updateConstraints() {
         leftLabelLeadingLayoutConstraint.constant = bounds.height / 2
-        leftLabelTrailingLayoutConstraint.constant = -toggleView.bounds.width - sliderLabelInset * 2
-        rightLabelLeadingLayoutConstraint.constant = toggleView.bounds.width + sliderLabelInset * 2
+        leftLabelTrailingLayoutConstraint.constant = -toggleContainerView.bounds.width - sliderLabelInset * 2
+        rightLabelLeadingLayoutConstraint.constant = toggleContainerView.bounds.width + sliderLabelInset * 2
         rightLabelTrailingLayoutConstraint.constant = -bounds.height / 2
 
         super.updateConstraints()
@@ -385,38 +394,36 @@ public protocol SliderControlProtocol {
     @objc func pan(_ gesture: UIPanGestureRecognizer) {
         switch gesture.state {
         case .possible, .began:
-            initialToggleViewConstant = fabs(position == .left ? toggleViewLeadingLayoutConstraint.constant : toggleViewTrailingLayoutConstraint.constant)
+            initialToggleContainerViewConstant = position == .left ? toggleContainerViewLeadingLayoutConstraint.constant : toggleContainerViewTrailingLayoutConstraint.constant
             break
         case .changed:
-            guard var layoutConstraint = initialToggleViewConstant else { return }
-            layoutConstraint += fabs(gesture.translation(in: self).x)
-            layoutConstraint = max(min(layoutConstraint, bounds.width - sliderLabelInset - toggleView.bounds.width), sliderLabelInset)
+            guard var layoutConstant = initialToggleContainerViewConstant else { return }
+            let translation = gesture.translation(in: self)
+            let freeDistance = bounds.width - toggleContainerView.bounds.width - sliderLabelInset
+            layoutConstant += translation.x
 
             if position == .left {
-                toggleViewLeadingLayoutConstraint.constant = layoutConstraint
+                layoutConstant = max(min(layoutConstant, freeDistance), sliderLabelInset)
+                toggleContainerViewLeadingLayoutConstraint.constant = layoutConstant
             } else {
-                toggleViewTrailingLayoutConstraint.constant = -layoutConstraint
+                layoutConstant = min(max(layoutConstant, -freeDistance), -sliderLabelInset)
+                toggleContainerViewTrailingLayoutConstraint.constant = layoutConstant
             }
 
-            let alpha = (layoutConstraint + toggleView.bounds.width) / bounds.width
-            leftBackgroundView.alpha = alpha
-            rightBackgroundView.alpha = 1 - alpha
             break
         case .ended, .failed, .cancelled:
-            guard initialToggleViewConstant != nil else { return }
-
-            let halfToggleView = toggleView.bounds.width / 2
-            let halfSliderControl = bounds.width / SliderConstants.numberOfLabels
-            let newPosition: SliderPosition
+            guard initialToggleContainerViewConstant != nil else { return }
+            let halfADistance = bounds.width / 2 - toggleContainerView.bounds.width / 2 - sliderLabelInset * 2
+            var newPosition: SliderPosition
 
             if position == .left {
-                newPosition = toggleViewLeadingLayoutConstraint.constant + halfToggleView < halfSliderControl ? .left : .right
+                newPosition = toggleContainerViewLeadingLayoutConstraint.constant < halfADistance ? .left : .right
             } else {
-                newPosition = fabs(toggleViewTrailingLayoutConstraint.constant) + halfToggleView < halfSliderControl ? .right : .left
+                newPosition = toggleContainerViewTrailingLayoutConstraint.constant > -halfADistance ? .right : .left
             }
 
             change(position: newPosition, animated: true)
-            initialToggleViewConstant = nil
+            initialToggleContainerViewConstant = nil
             break
         }
     }
@@ -429,7 +436,6 @@ public protocol SliderControlProtocol {
     }
 
     public override var intrinsicContentSize: CGSize {
-
         return CGSize(width: SliderConstants.minWidth, height: SliderConstants.minHeight)
     }
 
@@ -453,29 +459,7 @@ public protocol SliderControlProtocol {
         emptyLabel.adjustsFontSizeToFitWidth = true
         emptyLabel.numberOfLines = 0
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
-//        emptyLabel.backgroundColor = #colorLiteral(red: 0.7450980544, green: 0.1568627506, blue: 0.07450980693, alpha: 1)
         return emptyLabel
-    }
-
-    fileprivate func createSliderViewLayers() {
-        [sliderViewShadowLayer, sliderViewGradientLayer].forEach { $0.removeFromSuperlayer() }
-
-        sliderViewShadowLayer.path = UIBezierPath(roundedRect: sliderView.bounds, cornerRadius: sliderView.bounds.height / 2).cgPath
-        sliderViewShadowLayer.fillColor = UIColor.clear.cgColor
-        sliderViewShadowLayer.shadowColor = UIColor.black.cgColor
-        sliderViewShadowLayer.shadowPath = sliderViewShadowLayer.path
-        sliderViewShadowLayer.shadowOffset = SliderConstants.sliderViewShadowOffset
-        sliderViewShadowLayer.shadowOpacity = SliderConstants.sliderViewShadowOpacity
-        sliderViewShadowLayer.shadowRadius = SliderConstants.sliderViewShadowRadius
-        sliderView.layer.insertSublayer(sliderViewShadowLayer, below: sliderViewLabel.layer)
-
-        sliderViewGradientLayer.colors = [sliderFirstBackgroundColor, sliderSecondBackgroundColor].map { $0.cgColor }
-        sliderViewGradientLayer.startPoint = CGPoint(x: 0, y: 0)
-        sliderViewGradientLayer.endPoint = CGPoint(x: 0, y: 1)
-        sliderViewGradientLayer.frame = sliderView.bounds
-        sliderViewGradientLayer.cornerRadius = sliderView.bounds.height / 2
-        sliderViewGradientLayer.masksToBounds = true
-        sliderView.layer.insertSublayer(sliderViewGradientLayer, below: sliderViewLabel.layer)
     }
 
 }
@@ -484,11 +468,42 @@ public protocol SliderControlProtocol {
 // MARK: - Default Slider View
 
 public class SliderToggleView: UIView {
-    public override func layoutSubviews() {
-        super.layoutSubviews()
 
-        backgroundColor = #colorLiteral(red: 0.7254902124, green: 0.4784313738, blue: 0.09803921729, alpha: 1)
+    public var topColor: UIColor = SliderDefaultColors.sliderFirstBackgroundColor {
+        didSet {
+            gradientLayer.colors = [topColor, bottomColor].map { $0.cgColor }
+        }
     }
+    public var bottomColor: UIColor = SliderDefaultColors.sliderSecondBackgroundColor {
+        didSet {
+            gradientLayer.colors = [topColor, bottomColor].map { $0.cgColor }
+        }
+    }
+
+    private var gradientLayer: CAGradientLayer {
+        return layer as! CAGradientLayer
+    }
+
+    override public class var layerClass : AnyClass {
+        return CAGradientLayer.self
+    }
+
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        commonInit()
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    private func commonInit() {
+        gradientLayer.colors = [topColor, bottomColor].map { $0.cgColor }
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 0, y: 1)
+    }
+
 }
 
 
@@ -505,13 +520,76 @@ private class SliderMainLayer: CALayer {
 }
 
 
+// MARK: - Toggle Container View
+
+private class SliderToggleContainerView: UIView {
+    private let shadowLayer = CAShapeLayer()
+    private lazy var containerView: UIView = {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.clipsToBounds = true
+        containerView.backgroundColor = UIColor.clear
+        return containerView
+    }()
+
+    public func addContentView(_ view: UIView) {
+        containerView.subviews.forEach { $0.removeFromSuperview() }
+        containerView.addSubview(view)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor).isActive = true
+        view.topAnchor.constraint(equalTo: containerView.topAnchor).isActive = true
+        view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor).isActive = true
+        view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
+    }
+
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        commonInit()
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    private func commonInit() {
+        addSubview(containerView)
+
+        setupConstraints()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        shadowLayer.removeFromSuperlayer()
+        shadowLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: bounds.height / 2).cgPath
+        shadowLayer.fillColor = UIColor.clear.cgColor
+        shadowLayer.shadowColor = UIColor.black.cgColor
+        shadowLayer.shadowPath = shadowLayer.path
+        shadowLayer.shadowOffset = SliderConstants.sliderViewShadowOffset
+        shadowLayer.shadowOpacity = SliderConstants.sliderViewShadowOpacity
+        shadowLayer.shadowRadius = SliderConstants.sliderViewShadowRadius
+        layer.insertSublayer(shadowLayer, below: containerView.layer)
+
+        containerView.layer.cornerRadius = bounds.height / 2
+    }
+
+    func setupConstraints() {
+        containerView.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+        containerView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        containerView.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+        containerView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+    }
+
+}
+
+
 // MARK: - UIGestureRecognizerDelegate
 
 extension SliderControl: UIGestureRecognizerDelegate {
 
     override open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer == panGesture {
-            return toggleView.frame.contains(gestureRecognizer.location(in: self))
+            return toggleContainerView.frame.contains(gestureRecognizer.location(in: self))
         }
 
         return super.gestureRecognizerShouldBegin(gestureRecognizer)
