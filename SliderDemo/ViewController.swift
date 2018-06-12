@@ -51,6 +51,7 @@ class ViewController: UIViewController {
     var fifthToggleViewButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = #colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1)
+        button.isUserInteractionEnabled = false
         button.setTitle("→", for: .normal)
         return button
     }()
@@ -67,7 +68,7 @@ class ViewController: UIViewController {
         configureSeventhSliderControl()
     }
 
-    /// Uncoment for test Slider Control customization
+    /// Uncoment to test Slider Control customization
     @IBAction func didTouchTestButton() {
 //        firstSliderControl.customToggleView = {
 //            let imageView = UIImageView(image: #imageLiteral(resourceName: "stop"))
