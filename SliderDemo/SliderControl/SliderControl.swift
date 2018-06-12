@@ -458,12 +458,12 @@ public class SliderToggleView: UIView {
 
     public var topColor: UIColor = SliderDefaultColors.sliderFirstBackgroundColor {
         didSet {
-            gradientLayer.colors = [topColor, bottomColor].map { $0.cgColor }
+            gradientLayer.colors = [topColor.cgColor, bottomColor.cgColor]
         }
     }
     public var bottomColor: UIColor = SliderDefaultColors.sliderSecondBackgroundColor {
         didSet {
-            gradientLayer.colors = [topColor, bottomColor].map { $0.cgColor }
+            gradientLayer.colors = [topColor.cgColor, bottomColor.cgColor]
         }
     }
 
@@ -486,7 +486,7 @@ public class SliderToggleView: UIView {
     }
 
     private func commonInit() {
-        gradientLayer.colors = [topColor, bottomColor].map { $0.cgColor }
+        gradientLayer.colors = [topColor.cgColor, bottomColor.cgColor]
         gradientLayer.startPoint = CGPoint(x: 0, y: 0)
         gradientLayer.endPoint = CGPoint(x: 0, y: 1)
     }
