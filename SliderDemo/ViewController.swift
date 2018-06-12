@@ -69,7 +69,11 @@ class ViewController: UIViewController {
 
     /// Uncoment for test Slider Control customization
     @IBAction func didTouchTestButton() {
-//        firstSliderControl.customToggleView = secondToggleView
+//        firstSliderControl.customToggleView = {
+//            let imageView = UIImageView(image: #imageLiteral(resourceName: "stop"))
+//            imageView.contentMode = .center
+//            return imageView
+//        }()
 
 //        firstSliderControl.leftSideTitle = NSLocalizedString("slider.test.text", comment: "")
 //        firstSliderControl.rightSideTitle = NSLocalizedString("slider.test.text", comment: "")
