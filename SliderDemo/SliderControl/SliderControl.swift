@@ -367,8 +367,7 @@ public protocol SliderControlProtocol {
     // MARK: Gestures
 
     @objc private func tap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: self)
-        change(position: location.x < bounds.width / SliderConstants.numberOfLabels ? .left : .right , animated: true)
+        change(position: position == .left ? .right : .left , animated: true)
     }
 
     @objc private func pan(_ gesture: UIPanGestureRecognizer) {
